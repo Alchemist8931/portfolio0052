@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceBook — Бронирование площадей</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+            'mono': ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            'space': {
+              'bg': '#0c111d',
+              'surface': '#111827',
+              'card': '#0f172a',
+              'border': '#1f2937',
+              'border-light': '#374151',
+              'text': '#f3f4f6',
+              'text-muted': '#9ca3af',
+              'text-dim': '#6b7280',
+              'accent': '#0052cc',
+              'accent-light': '#2684ff',
+              'accent-glow': 'rgba(0, 82, 204, 0.35)',
+              'success': '#10b981',
+              'warning': '#f59e0b',
+              'danger': '#ef4444',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-color: #0c111d;
+      --card-border: #1f2937;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --accent-color: #0052cc;
+      --accent-light: #2684ff;
+      --accent-glow: rgba(0, 82, 204, 0.35);
+      --brand-gradient: linear-gradient(135deg, #0052cc, #2684ff);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(31, 41, 55, 0.5);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-light);
+    }
+
+    /* Animations */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    @keyframes grid-move {
+      0% { background-position: 0 0; }
+      100% { background-position: 30px 30px; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+      50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(0, 82, 204, 0.2); }
+    }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slide-in-right {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scale-in {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes toast-out {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(100%); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-slide-up {
+      animation: slide-up 0.6s ease-out forwards;
+    }
+
+    .animate-slide-in-right {
+      animation: slide-in-right 0.5s ease-out forwards;
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.4s ease-out forwards;
+    }
+
+    .animate-scale-in {
+      animation: scale-in 0.3s ease-out forwards;
+    }
+
+    /* Card Base */
+    .nhost-card {
+      font-family: 'Inter', system-ui, sans-serif;
+      width: 100%;
+      background-color: var(--bg-color);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.3s ease,
+                  border-color 0.3s ease;
+      z-index: 1;
+    }
+
+    .nhost-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(38, 132, 255, 0.3);
+      border-color: rgba(38, 132, 255, 0.5);
+    }
+
+    .card-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 30px 30px;
+      mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+      pointer-events: none;
+      z-index: -2;
+      transition: opacity 0.5s ease;
+      opacity: 0.4;
+    }
+
+    .nhost-card:hover .card-grid {
+      animation: grid-move 25s linear infinite;
+      opacity: 0.7;
+    }
+
+    .card-glow {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(50px);
+      z-index: -1;
+      transition: all 0.5s ease;
+    }
+
+    .nhost-card:hover .card-glow {
+      transform: scale(1.6);
+      background: radial-gradient(circle, rgba(38, 132, 255, 0.45) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+
+    /* Badges */
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-event {
+      background-color: rgba(0, 82, 204, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(0, 82, 204, 0.3);
+    }
+
+    .badge-daily {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-feature {
+      background-color: rgba(251, 191, 36, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.25);
+    }
+
+    .badge-feature:hover {
+      background-color: rgba(251, 191, 36, 0.2);
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--brand-gradient);
+      color: white;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 82, 204, 0.4);
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* Inputs */
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(38, 132, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-color);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1a1f2e;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toast-in 0.4s ease-out;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      min-width: 300px;
+    }
+
+    .toast.removing {
+      animation: toast-out 0.3s ease-out forwards;
+    }
+
+    .toast-success {
+      border-left: 3px solid #10b981;
+    }
+
+    .toast-error {
+      border-left: 3px solid #ef4444;
+    }
+
+    .toast-info {
+      border-left: 3px solid #3b82f6;
+    }
+
+    /* Space Card Image */
+    .space-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .nhost-card:hover .space-image {
+      transform: scale(1.02);
+    }
+
+    /* Page transitions */
+    .page {
+      display: none;
+      opacity: 0;
+    }
+
+    .page.active {
+      display: block;
+      animation: fade-in 0.4s ease-out forwards;
+    }
+
+    /* Header */
+    .main-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(12, 17, 29, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    /* Background decorations */
+    .bg-decoration {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-decoration-1 {
+      top: -200px;
+      right: -100px;
+      background: #0052cc;
+    }
+
+    .bg-decoration-2 {
+      bottom: -200px;
+      left: -100px;
+      background: #10b981;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Blinking cursor */
+    .blinking-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 3px;
+      background-color: var(--accent-color);
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+      box-shadow: 0 0 8px var(--accent-color);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .nhost-card {
+        padding: 18px;
+      }
+      
+      .space-image {
+        height: 150px;
+      }
+      
+      .toast-container {
+        left: 10px;
+        right: 10px;
+      }
+      
+      .toast {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Decorations -->
+  <div class="bg-decoration bg-decoration-1"></div>
+  <div class="bg-decoration bg-decoration-2"></div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main App Container -->
+  <div id="app">
+    <!-- Header -->
+    <header class="main-header" id="main-header">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <a href="#/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-space-accent to-space-accent-light flex items-center justify-center transition-transform group-hover:scale-110">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+              </svg>
+            </div>
+            <span class="font-mono font-bold text-lg text-space-text">SpaceBook</span>
+          </a>
+
+          <!-- Navigation -->
+          <nav id="nav-links" class="hidden items-center gap-2">
+            <a href="#/" class="nav-link px-4 py-2 rounded-lg text-space-text-muted hover:text-space-text hover:bg-white/5 transition-all">Каталог</a>
+            <a href="#/profile" class="nav-link px-4 py-2 rounded-lg text-space-text-muted hover:text-space-text hover:bg-white/5 transition-all">Мои брони</a>
+          </nav>
+
+          <!-- User Menu -->
+          <div id="user-menu" class="hidden items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-space-accent to-space-accent-light flex items-center justify-center">
+              <span id="user-avatar" class="text-white font-semibold text-sm"></span>
+            </div>
+            <button id="logout-btn" class="btn-icon" title="Выйти">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Guest Menu -->
+          <div id="guest-menu" class="flex items-center gap-3">
+            <a href="#/login" class="btn-secondary text-sm py-2 px-5">Войти</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-12 min-h-screen relative z-10">
+      <!-- Login Page -->
+      <div id="page-login" class="page">
+        <div class="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4">
+          <div class="nhost-card w-full max-w-md animate-slide-up" style="--delay: 0s">
+            <div class="card-glow"></div>
+            <div class="card-grid"></div>
+            
+            <div class="relative z-10">
+              <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-space-accent to-space-accent-light mb-4">
+                  <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                  </svg>
+                </div>
+                <h1 class="font-mono text-2xl font-bold text-space-text mb-2">SpaceBook</h1>
+                <p class="text-space-text-muted">Найди идеальное пространство</p>
+              </div>
+
+              <form id="login-form" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-space-text-muted mb-2">Email</label>
+                  <input type="email" id="login-email" class="input-field" placeholder="your@email.com" autocomplete="email">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-space-text-muted mb-2">Пароль</label>
+                  <input type="password" id="login-password" class="input-field" placeholder="Введите пароль" autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn-primary w-full mt-6">
+                  <span id="login-btn-text">Войти</span>
+                </button>
+                
+                <div class="relative my-6">
+                  <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-space-border"></div>
+                  </div>
+                  <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-space-bg text-space-text-muted">или</span>
+                  </div>
+                </div>
+                
+                <button type="button" id="guest-login-btn" class="btn-secondary w-full">
+                  Войти как гость
+                </button>
+              </form>
+
+              <p class="text-center text-space-text-muted text-sm mt-6">
+                Демо-режим: любые данные для входа
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catalog Page -->
+      <div id="page-catalog" class="page">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Hero Section -->
+          <div class="text-center py-12 animate-slide-up">
+            <h1 class="font-mono text-4xl sm:text-5xl font-bold text-space-text mb-4">
+              Найди своё<span class="blinking-cursor"></span>
+            </h1>
+            <p class="text-space-text-muted text-lg max-w-2xl mx-auto">
+              Бронируйте уникальные пространства для мероприятий и посуточной аренды
+            </p>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex flex-wrap gap-3 mb-8 animate-slide-up" style="animation-delay: 0.1s">
+            <button class="filter-btn btn-primary text-sm py-2 px-5" data-filter="all">
+              Все
+            </button>
+            <button class="filter-btn btn-secondary text-sm py-2 px-5" data-filter="event">
+              Мероприятия
+            </button>
+            <button class="filter-btn btn-secondary text-sm py-2 px-5" data-filter="daily">
+              Посуточно
+            </button>
+          </div>
+
+          <!-- Spaces Grid -->
+          <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Spaces will be rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Page -->
+      <div id="page-profile" class="page">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="py-8">
+            <h1 class="font-mono text-3xl font-bold text-space-text mb-2 animate-slide-up">Личный кабинет</h1>
+            <p class="text-space-text-muted animate-slide-up" style="animation-delay: 0.05s">Ваши бронирования</p>
+          </div>
+
+          <!-- Bookings List -->
+          <div id="bookings-list" class="space-y-4">
+            <!-- Bookings will be rendered here -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-bookings" class="hidden text-center py-16">
+            <div class="w-20 h-20 rounded-full bg-space-surface mx-auto mb-6 flex items-center justify-center">
+              <svg class="w-10 h-10 text-space-text-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-space-text mb-2">Нет бронирований</h3>
+            <p class="text-space-text-muted mb-6">Выберите пространство в каталоге</p>
+            <a href="#/" class="btn-primary inline-block">Перейти в каталог</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Booking Modal -->
+  <div id="booking-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <div class="card-grid"></div>
+      <div class="relative">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-space-border">
+          <h2 id="modal-title" class="font-mono text-xl font-bold text-space-text">Бронирование</h2>
+          <button id="modal-close" class="btn-icon" aria-label="Закрыть">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6">
+          <div id="modal-space-info" class="mb-6">
+            <!-- Space info will be rendered here -->
+          </div>
+
+          <form id="booking-form" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-space-text-muted mb-2">Дата</label>
+                <input type="date" id="booking-date" class="input-field" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-space-text-muted mb-2">Время</label>
+                <select id="booking-time" class="input-field" required>
+                  <option value="">Выберите время</option>
+                  <option value="09:00">09:00</option>
+                  <option value="10:00">10:00</option>
+                  <option value="11:00">11:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="13:00">13:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:00">15:00</option>
+                  <option value="16:00">16:00</option>
+                  <option value="17:00">17:00</option>
+                  <option value="18:00">18:00</option>
+                  <option value="19:00">19:00</option>
+                  <option value="20:00">20:00</option>
+                  <option value="21:00">21:00</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-space-text-muted mb-2">Длительность (часы)</label>
+              <select id="booking-duration" class="input-field" required>
+                <option value="1">1 час</option>
+                <option value="2">2 часа</option>
+                <option value="3" selected>3 часа</option>
+                <option value="4">4 часа</option>
+                <option value="5">5 часов</option>
+                <option value="8">8 часов (целый день)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-space-text-muted mb-2">Комментарий</label>
+              <textarea id="booking-comment" class="input-field" rows="2" placeholder="Дополнительная информация..."></textarea>
+            </div>
+
+            <!-- Price Summary -->
+            <div class="bg-space-surface rounded-xl p-4 border border-space-border">
+              <div class="flex items-center justify-between">
+                <span class="text-space-text-muted">Итого:</span>
+                <span id="total-price" class="font-mono text-2xl font-bold text-space-accent-light">0 руб</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">
+              <span id="booking-btn-text">Забронировать</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // MOCK DATA
+    // ==========================================
+    const mockSpaces = [
+      {
+        id: "space_01",
+        title: "Conference Hall Alpha",
+        type: "event",
+        description: "Просторный конференц-зал с современным оборудованием для презентаций, семинаров и деловых встреч вместимостью до 50 человек.",
+        price: 5000,
+        tags: ["Проектор", "Звук", "Wi-Fi", "Кондиционер"],
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_02",
+        title: "Loft Studio #7",
+        type: "daily",
+        description: "Стильный лофт в центре города с панорамными окнами. Идеально для фотосессий, творческих встреч или комфортного отдыха.",
+        price: 3500,
+        tags: ["Кухня", "Wi-Fi", "Парковка", "Терраса"],
+        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_03",
+        title: "Tech Hub Workspace",
+        type: "event",
+        description: "Современный коворкинг с переговорными комнатами, высокоскоростным интернетом и зоной отдыха для IT-команд.",
+        price: 2800,
+        tags: ["Wi-Fi", "Мониторы", "Кофе", "Зона отдыха"],
+        image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_04",
+        title: "Art Gallery Space",
+        type: "event",
+        description: "Минималистичное пространство для выставок, вернисажей и культурных мероприятий. Профессиональное освещение включено.",
+        price: 7500,
+        tags: ["Подсветка", "Wi-Fi", "Охрана", "Гардероб"],
+        image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_05",
+        title: "Cozy Apartment Downtown",
+        type: "daily",
+        description: "Уютная квартира-студия в историческом центре. Полностью оборудованная кухня, уютная спальня и вид на город.",
+        price: 4200,
+        tags: ["Кухня", "Wi-Fi", "TV", "Балкон"],
+        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_06",
+        title: "Rooftop Event Terrace",
+        type: "event",
+        description: "Впечатляющая терраса на крыше с видом на городскую панораму. Идеально для вечеринок, свадеб и корпоративных событий.",
+        price: 12000,
+        tags: ["Терраса", "Бар", "Wi-Fi", "Вид"],
+        image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_07",
+        title: "Recording Studio Pro",
+        type: "daily",
+        description: "Профессиональная студия звукозаписи с акустической обработкой. Подходит для подкастов, музыки и озвучки.",
+        price: 6500,
+        tags: ["Звук", "Микшер", "Wi-Fi", "Кондиционер"],
+        image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_08",
+        title: "Modern Penthouse Suite",
+        type: "daily",
+        description: "Роскошный пентхаус с джакузи, сауной и частным лифтом. Премиум-отдых для особых случаев.",
+        price: 15000,
+        tags: ["Джакузи", "Сауна", "Wi-Fi", "Лифт"],
+        image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop",
+        available: true
+      },
+      {
+        id: "space_09",
+        title: "Training Center Pro",
+        type: "event",
+        description: "Учебный центр с несколькими аудиториями, зоной кофе-брейка и всем необходимым для тренингов и мастер-классов.",
+        price: 8000,
+        tags: ["Проектор", "Флипчарт", "Wi-Fi", "Кейтеринг"],
+        image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=600&fit=crop",
+        available: true
+      }
+    ];
+
+    // ==========================================
+    // STATE MANAGEMENT
+    // ==========================================
+    const state = {
+      user: null,
+      currentSpace: null,
+      bookings: [],
+      filter: 'all'
+    };
+
+    // ==========================================
+    // STORAGE SERVICE
+    // ==========================================
+    const Storage = {
+      getUser() {
+        try {
+          const user = localStorage.getItem('spacebook_user');
+          return user ? JSON.parse(user) : null;
+        } catch (e) {
+          return null;
+        }
+      },
+      
+      setUser(user) {
+        localStorage.setItem('spacebook_user', JSON.stringify(user));
+      },
+      
+      removeUser() {
+        localStorage.removeItem('spacebook_user');
+      },
+      
+      getBookings() {
+        try {
+          const bookings = localStorage.getItem('spacebook_bookings');
+          return bookings ? JSON.parse(bookings) : [];
+        } catch (e) {
+          return [];
+        }
+      },
+      
+      setBookings(bookings) {
+        localStorage.setItem('spacebook_bookings', JSON.stringify(bookings));
+      },
+      
+      addBooking(booking) {
+        const bookings = this.getBookings();
+        bookings.push(booking);
+        this.setBookings(bookings);
+      },
+      
+      removeBooking(bookingId) {
+        const bookings = this.getBookings();
+        const filtered = bookings.filter(b => b.id !== bookingId);
+        this.setBookings(filtered);
+      }
+    };
+
+    // ==========================================
+    // TOAST NOTIFICATIONS
+    // ==========================================
+    const Toast = {
+      show(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+          success: '<svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+          error: '<svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+          info: '<svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        };
+        
+        toast.innerHTML = `
+          ${icons[type] || icons.info}
+          <span class="text-space-text text-sm">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.classList.add('removing');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      success(message) {
+        this.show(message, 'success');
+      },
+      
+      error(message) {
+        this.show(message, 'error');
+      },
+      
+      info(message) {
+        this.show(message, 'info');
+      }
+    };
+
+    // ==========================================
+    // ROUTER
+    // ==========================================
+    const Router = {
+      routes: {
+        '': 'catalog',
+        '/': 'catalog',
+        '/login': 'login',
+        '/profile': 'profile'
+      },
+      
+      init() {
+        window.addEventListener('hashchange', () => this.navigate());
+        this.navigate();
+      },
+      
+      navigate() {
+        const hash = window.location.hash.slice(1) || '/';
+        const route = this.routes[hash] || 'catalog';
+        
+        // Check auth for protected routes
+        if ((route === 'profile') && !state.user) {
+          window.location.hash = '/login';
+          return;
+        }
+        
+        // Redirect logged-in users away from login
+        if (route === 'login' && state.user) {
+          window.location.hash = '/';
+          return;
+        }
+        
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+          page.classList.remove('active');
+        });
+        
+        // Show current page
+        const page = document.getElementById(`page-${route}`);
+        if (page) {
+          page.classList.add('active');
+        }
+        
+        // Update UI
+        this.updateUI();
+        
+        // Render content
+        if (route === 'catalog') {
+          renderSpaces();
+        } else if (route === 'profile') {
+          renderBookings();
+        }
+      },
+      
+      updateUI() {
+        const navLinks = document.getElementById('nav-links');
+        const userMenu = document.getElementById('user-menu');
+        const guestMenu = document.getElementById('guest-menu');
+        const userAvatar = document.getElementById('user-avatar');
+        
+        if (state.user) {
+          navLinks.classList.remove('hidden');
+          navLinks.classList.add('flex');
+          userMenu.classList.remove('hidden');
+          userMenu.classList.add('flex');
+          guestMenu.classList.add('hidden');
+          userAvatar.textContent = state.user.name.charAt(0).toUpperCase();
+        } else {
+          navLinks.classList.add('hidden');
+          navLinks.classList.remove('flex');
+          userMenu.classList.add('hidden');
+          userMenu.classList.remove('flex');
+          guestMenu.classList.remove('hidden');
+        }
+      }
+    };
+
+    // ==========================================
+    // AUTH SERVICE
+    // ==========================================
+    const Auth = {
+      login(email, name) {
+        const user = {
+          id: 'user_' + Math.random().toString(36).substr(2, 9),
+          email: email || 'guest@spacebook.demo',
+          name: name || email?.split('@')[0] || 'Гость'
+        };
+        
+        state.user = user;
+        Storage.setUser(user);
+        return user;
+      },
+      
+      logout() {
+        state.user = null;
+        Storage.removeUser();
+        window.location.hash = '/login';
+      },
+      
+      checkAuth() {
+        const user = Storage.getUser();
+        if (user) {
+          state.user = user;
+        }
+      }
+    };
+
+    // ==========================================
+    // BOOKING SERVICE
+    // ==========================================
+    const BookingService = {
+      create(spaceId, date, time, duration, comment) {
+        const space = mockSpaces.find(s => s.id === spaceId);
+        if (!space) return null;
+        
+        const booking = {
+          id: 'booking_' + Math.random().toString(36).substr(2, 9),
+          spaceId: space.id,
+          spaceTitle: space.title,
+          spaceImage: space.image,
+          spaceType: space.type,
+          date: date,
+          time: time,
+          duration: parseInt(duration),
+          price: space.price * parseInt(duration),
+          comment: comment,
+          userId: state.user.id,
+          createdAt: new Date().toISOString()
+        };
+        
+        Storage.addBooking(booking);
+        return booking;
+      },
+      
+      cancel(bookingId) {
+        Storage.removeBooking(bookingId);
+      },
+      
+      getUserBookings() {
+        const allBookings = Storage.getBookings();
+        return state.user 
+          ? allBookings.filter(b => b.userId === state.user.id)
+          : [];
+      }
+    };
+
+    // ==========================================
+    // RENDER FUNCTIONS
+    // ==========================================
+    function renderSpaces() {
+      const grid = document.getElementById('spaces-grid');
+      const filteredSpaces = state.filter === 'all' 
+        ? mockSpaces 
+        : mockSpaces.filter(s => s.type === state.filter);
+      
+      grid.innerHTML = filteredSpaces.map((space, index) => `
+        <div class="nhost-card cursor-pointer animate-slide-up" 
+             style="animation-delay: ${index * 0.05}s"
+             data-space-id="${space.id}"
+             onclick="openBookingModal('${space.id}')">
+          <div class="card-glow"></div>
+          <div class="card-grid"></div>
+          
+          <div class="relative z-10">
+            <img src="${space.image}" alt="${space.title}" class="space-image" loading="lazy">
+            
+            <div class="flex items-start justify-between mb-3">
+              <h3 class="font-mono text-lg font-bold text-space-text leading-tight">${space.title}</h3>
+              <span class="badge ${space.type === 'event' ? 'badge-event' : 'badge-daily'} ml-2 flex-shrink-0">
+                ${space.type === 'event' ? 'Мероприятие' : 'Посуточно'}
+              </span>
+            </div>
+            
+            <p class="text-space-text-muted text-sm mb-4 line-clamp-2">${space.description}</p>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+              ${space.tags.slice(0, 3).map(tag => `
+                <span class="badge badge-feature">${tag}</span>
+              `).join('')}
+              ${space.tags.length > 3 ? `<span class="badge badge-feature">+${space.tags.length - 3}</span>` : ''}
+            </div>
+            
+            <div class="flex items-center justify-between pt-4 border-t border-space-border">
+              <div>
+                <span class="text-space-text-muted text-xs">от</span>
+                <span class="font-mono text-xl font-bold text-space-accent-light ml-1">${space.price.toLocaleString()}</span>
+                <span class="text-space-text-muted text-sm ml-1">руб/час</span>
+              </div>
+              <div class="flex items-center gap-1 text-space-success text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Свободно
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBookings() {
+      const container = document.getElementById('bookings-list');
+      const emptyState = document.getElementById('empty-bookings');
+      const bookings = BookingService.getUserBookings();
+      
+      if (bookings.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyState.classList.add('hidden');
+      
+      // Sort by date descending
+      bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      container.innerHTML = bookings.map((booking, index) => `
+        <div class="nhost-card animate-slide-up" style="animation-delay: ${index * 0.05}s">
+          <div class="card-glow"></div>
+          <div class="card-grid"></div>
+          
+          <div class="relative z-10">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <img src="${booking.spaceImage}" alt="${booking.spaceTitle}" 
+                   class="w-full sm:w-32 h-24 object-cover rounded-lg flex-shrink-0">
+              
+              <div class="flex-1">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="font-mono text-lg font-bold text-space-text">${booking.spaceTitle}</h3>
+                    <span class="badge ${booking.spaceType === 'event' ? 'badge-event' : 'badge-daily'} mt-1">
+                      ${booking.spaceType === 'event' ? 'Мероприятие' : 'Посуточно'}
+                    </span>
+                  </div>
+                  <button class="btn-icon text-space-danger hover:bg-red-500/10" 
+                          onclick="cancelBooking('${booking.id}')"
+                          title="Отменить бронь">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div class="flex flex-wrap gap-4 mt-4 text-sm">
+                  <div class="flex items-center gap-2 text-space-text-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>${formatDate(booking.date)}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-space-text-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>${booking.time}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-space-text-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                    </svg>
+                    <span>${booking.duration} ч</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between mt-4 pt-4 border-t border-space-border">
+                  <div>
+                    <span class="text-space-text-muted text-xs">Итого:</span>
+                    <span class="font-mono text-lg font-bold text-space-accent-light ml-1">${booking.price.toLocaleString()} руб</span>
+                  </div>
+                  <span class="text-space-success text-sm flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Подтверждено
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==========================================
+    // MODAL FUNCTIONS
+    // ==========================================
+    function openBookingModal(spaceId) {
+      if (!state.user) {
+        Toast.info('Войдите для бронирования');
+        window.location.hash = '/login';
+        return;
+      }
+      
+      const space = mockSpaces.find(s => s.id === spaceId);
+      if (!space) return;
+      
+      state.currentSpace = space;
+      
+      const modal = document.getElementById('booking-modal');
+      const spaceInfo = document.getElementById('modal-space-info');
+      const dateInput = document.getElementById('booking-date');
+      
+      // Set min date to today
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.min = today;
+      dateInput.value = today;
+      
+      spaceInfo.innerHTML = `
+        <div class="flex gap-4">
+          <img src="${space.image}" alt="${space.title}" class="w-24 h-24 object-cover rounded-lg flex-shrink-0">
+          <div>
+            <h3 class="font-mono text-lg font-bold text-space-text">${space.title}</h3>
+            <span class="badge ${space.type === 'event' ? 'badge-event' : 'badge-daily'} mt-1">
+              ${space.type === 'event' ? 'Мероприятие' : 'Посуточно'}
+            </span>
+            <p class="text-space-text-muted text-sm mt-2">${space.price.toLocaleString()} руб/час</p>
+          </div>
+        </div>
+      `;
+      
+      updateTotalPrice();
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeBookingModal() {
+      const modal = document.getElementById('booking-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      state.currentSpace = null;
+      document.getElementById('booking-form').reset();
+    }
+
+    function updateTotalPrice() {
+      if (!state.currentSpace) return;
+      
+      const duration = parseInt(document.getElementById('booking-duration').value) || 1;
+      const total = state.currentSpace.price * duration;
+      
+      document.getElementById('total-price').textContent = total.toLocaleString() + ' руб';
+    }
+
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    function formatDate(dateStr) {
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      return new Date(dateStr).toLocaleDateString('ru-RU', options);
+    }
+
+    function cancelBooking(bookingId) {
+      if (confirm('Отменить бронирование?')) {
+        BookingService.cancel(bookingId);
+        renderBookings();
+        Toast.success('Бронирование отменено');
+      }
+    }
+
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check auth
+      Auth.checkAuth();
+      
+      // Init router
+      Router.init();
+      
+      // Login form
+      document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        Auth.login(email);
+        Toast.success('Добро пожаловать!');
+        window.location.hash = '/';
+      });
+      
+      // Guest login
+      document.getElementById('guest-login-btn').addEventListener('click', () => {
+        Auth.login(null, 'Гость');
+        Toast.success('Добро пожаловать!');
+        window.location.hash = '/';
+      });
+      
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        Auth.logout();
+        Toast.info('Вы вышли из системы');
+      });
+      
+      // Filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.dataset.filter;
+          state.filter = filter;
+          
+          // Update button styles
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-secondary');
+          });
+          btn.classList.remove('btn-secondary');
+          btn.classList.add('btn-primary');
+          
+          renderSpaces();
+        });
+      });
+      
+      // Modal close
+      document.getElementById('modal-close').addEventListener('click', closeBookingModal);
+      
+      // Close modal on overlay click
+      document.getElementById('booking-modal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+          closeBookingModal();
+        }
+      });
+      
+      // Close modal on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeBookingModal();
+        }
+      });
+      
+      // Booking form
+      document.getElementById('booking-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        if (!state.currentSpace || !state.user) return;
+        
+        const date = document.getElementById('booking-date').value;
+        const time = document.getElementById('booking-time').value;
+        const duration = document.getElementById('booking-duration').value;
+        const comment = document.getElementById('booking-comment').value;
+        
+        if (!date || !time) {
+          Toast.error('Выберите дату и время');
+          return;
+        }
+        
+        const booking = BookingService.create(
+          state.currentSpace.id,
+          date,
+          time,
+          duration,
+          comment
+        );
+        
+        if (booking) {
+          closeBookingModal();
+          Toast.success('Бронирование создано!');
+        }
+      });
+      
+      // Update price on duration change
+      document.getElementById('booking-duration').addEventListener('change', updateTotalPrice);
+    });
+  </script>
+</body>
+</html>
