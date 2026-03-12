@@ -6,15 +6,15 @@
   <title>SpaceBook — Бронирование площадей</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            'sans': ['Inter', 'system-ui', 'sans-serif'],
-            'mono': ['JetBrains Mono', 'monospace'],
+            'sans': ['Spline Sans', 'system-ui', 'sans-serif'],
+            'mono': ['Spline Sans Mono', 'monospace'],
           },
           colors: {
             'space': {
@@ -52,6 +52,8 @@
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     html {
@@ -59,14 +61,13 @@
     }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Spline Sans', system-ui, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -96,24 +97,9 @@
       100% { background-position: 30px 30px; }
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
-      50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(0, 82, 204, 0.2); }
-    }
-
     @keyframes slide-up {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slide-in-right {
-      from { opacity: 0; transform: translateX(30px); }
-      to { opacity: 1; transform: translateX(0); }
     }
 
     @keyframes fade-in {
@@ -126,33 +112,23 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-5px); }
-      40%, 80% { transform: translateX(5px); }
-    }
-
-    @keyframes toast-in {
-      from { opacity: 0; transform: translateX(100%); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes toast-out {
-      from { opacity: 1; transform: translateX(0); }
-      to { opacity: 0; transform: translateX(100%); }
-    }
-
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
 
-    .animate-slide-up {
-      animation: slide-up 0.6s ease-out forwards;
+    @keyframes slide-down {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .animate-slide-in-right {
-      animation: slide-in-right 0.5s ease-out forwards;
+    @keyframes toast-slide {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-slide-up {
+      animation: slide-up 0.6s ease-out forwards;
     }
 
     .animate-fade-in {
@@ -163,9 +139,13 @@
       animation: scale-in 0.3s ease-out forwards;
     }
 
+    .animate-slide-down {
+      animation: slide-down 0.2s ease-out forwards;
+    }
+
     /* Card Base */
     .nhost-card {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Spline Sans', system-ui, sans-serif;
       width: 100%;
       background-color: var(--bg-color);
       border: 1px solid var(--card-border);
@@ -228,15 +208,13 @@
 
     /* Badges */
     .badge {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Spline Sans Mono', monospace;
       font-size: 11px;
       font-weight: 600;
       padding: 4px 10px;
       border-radius: 6px;
       transition: all 0.3s ease;
       cursor: default;
-      position: relative;
-      overflow: hidden;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -277,7 +255,7 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Spline Sans', sans-serif;
       font-size: 15px;
     }
 
@@ -314,7 +292,7 @@
       border: 1px solid var(--card-border);
       cursor: pointer;
       transition: all 0.3s ease;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Spline Sans', sans-serif;
       font-size: 15px;
     }
 
@@ -343,28 +321,295 @@
       transform: translateY(-2px);
     }
 
-    /* Inputs */
-    .input-field {
+    /* Custom Input Base */
+    .custom-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .custom-input {
       width: 100%;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--card-border);
       border-radius: 10px;
       padding: 14px 18px;
       color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Spline Sans', sans-serif;
       font-size: 15px;
       transition: all 0.3s ease;
       outline: none;
     }
 
-    .input-field:focus {
+    .custom-input:focus {
       border-color: var(--accent-light);
       box-shadow: 0 0 0 3px rgba(38, 132, 255, 0.15);
       background: rgba(255, 255, 255, 0.05);
     }
 
-    .input-field::placeholder {
+    .custom-input::placeholder {
       color: var(--text-secondary);
+    }
+
+    /* Custom Select */
+    .custom-select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .custom-select-trigger {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      font-family: 'Spline Sans', sans-serif;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .custom-select-trigger:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .custom-select-wrapper.open .custom-select-trigger {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(38, 132, 255, 0.15);
+    }
+
+    .custom-select-arrow {
+      width: 18px;
+      height: 18px;
+      color: var(--text-secondary);
+      transition: transform 0.3s ease;
+    }
+
+    .custom-select-wrapper.open .custom-select-arrow {
+      transform: rotate(180deg);
+    }
+
+    .custom-select-placeholder {
+      color: var(--text-secondary);
+    }
+
+    .custom-select-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #151c2c;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+      max-height: 280px;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .custom-select-wrapper.open .custom-select-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .custom-select-option {
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .custom-select-option:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    .custom-select-option.selected {
+      background: rgba(0, 82, 204, 0.15);
+      color: var(--accent-light);
+    }
+
+    .custom-select-option.selected::after {
+      content: '';
+      width: 6px;
+      height: 10px;
+      border: solid var(--accent-light);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-right: 4px;
+    }
+
+    /* Custom Date Picker */
+    .date-picker-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .date-picker-trigger {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      font-family: 'Spline Sans', sans-serif;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .date-picker-trigger:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .date-picker-wrapper.open .date-picker-trigger {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(38, 132, 255, 0.15);
+    }
+
+    .date-picker-calendar {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #151c2c;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      min-width: 280px;
+    }
+
+    .date-picker-wrapper.open .date-picker-calendar {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .calendar-month-year {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    .calendar-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .calendar-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      padding: 8px 0;
+      text-transform: uppercase;
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+    }
+
+    .calendar-day:hover:not(.disabled):not(.empty) {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .calendar-day.today {
+      border-color: var(--accent-color);
+      color: var(--accent-light);
+    }
+
+    .calendar-day.selected {
+      background: var(--brand-gradient);
+      color: white;
+      font-weight: 600;
+    }
+
+    .calendar-day.disabled {
+      color: var(--text-dim);
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .calendar-day.empty {
+      cursor: default;
+    }
+
+    .calendar-day.other-month {
+      color: var(--text-dim);
+      opacity: 0.5;
     }
 
     /* Modal */
@@ -427,26 +672,14 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      animation: toast-in 0.4s ease-out;
+      animation: toast-slide 0.4s ease-out;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       min-width: 300px;
     }
 
-    .toast.removing {
-      animation: toast-out 0.3s ease-out forwards;
-    }
-
-    .toast-success {
-      border-left: 3px solid #10b981;
-    }
-
-    .toast-error {
-      border-left: 3px solid #ef4444;
-    }
-
-    .toast-info {
-      border-left: 3px solid #3b82f6;
-    }
+    .toast-success { border-left: 3px solid #10b981; }
+    .toast-error { border-left: 3px solid #ef4444; }
+    .toast-info { border-left: 3px solid #3b82f6; }
 
     /* Space Card Image */
     .space-image {
@@ -509,16 +742,6 @@
       background: #10b981;
     }
 
-    /* Loading spinner */
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
     /* Blinking cursor */
     .blinking-cursor {
       display: inline-block;
@@ -528,6 +751,16 @@
       margin-left: 4px;
       animation: blink 1s step-end infinite;
       box-shadow: 0 0 8px var(--accent-color);
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
 
     /* Reduced motion */
@@ -557,6 +790,22 @@
       .toast {
         min-width: auto;
       }
+      
+      .calendar-days {
+        gap: 2px;
+      }
+      
+      .calendar-day {
+        font-size: 13px;
+      }
+    }
+
+    /* Line clamp */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   </style>
 </head>
@@ -617,7 +866,7 @@
       <!-- Login Page -->
       <div id="page-login" class="page">
         <div class="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4">
-          <div class="nhost-card w-full max-w-md animate-slide-up" style="--delay: 0s">
+          <div class="nhost-card w-full max-w-md animate-slide-up">
             <div class="card-glow"></div>
             <div class="card-grid"></div>
             
@@ -637,11 +886,15 @@
               <form id="login-form" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-space-text-muted mb-2">Email</label>
-                  <input type="email" id="login-email" class="input-field" placeholder="your@email.com" autocomplete="email">
+                  <div class="custom-input-wrapper">
+                    <input type="email" id="login-email" class="custom-input" placeholder="your@email.com" autocomplete="email">
+                  </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-space-text-muted mb-2">Пароль</label>
-                  <input type="password" id="login-password" class="input-field" placeholder="Введите пароль" autocomplete="current-password">
+                  <div class="custom-input-wrapper">
+                    <input type="password" id="login-password" class="custom-input" placeholder="Введите пароль" autocomplete="current-password">
+                  </div>
                 </div>
                 
                 <button type="submit" class="btn-primary w-full mt-6">
@@ -698,7 +951,6 @@
 
           <!-- Spaces Grid -->
           <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Spaces will be rendered here -->
           </div>
         </div>
       </div>
@@ -713,7 +965,6 @@
 
           <!-- Bookings List -->
           <div id="bookings-list" class="space-y-4">
-            <!-- Bookings will be rendered here -->
           </div>
 
           <!-- Empty State -->
@@ -750,51 +1001,60 @@
         <!-- Modal Body -->
         <div class="p-6">
           <div id="modal-space-info" class="mb-6">
-            <!-- Space info will be rendered here -->
           </div>
 
-          <form id="booking-form" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-space-text-muted mb-2">Дата</label>
-                <input type="date" id="booking-date" class="input-field" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-space-text-muted mb-2">Время</label>
-                <select id="booking-time" class="input-field" required>
-                  <option value="">Выберите время</option>
-                  <option value="09:00">09:00</option>
-                  <option value="10:00">10:00</option>
-                  <option value="11:00">11:00</option>
-                  <option value="12:00">12:00</option>
-                  <option value="13:00">13:00</option>
-                  <option value="14:00">14:00</option>
-                  <option value="15:00">15:00</option>
-                  <option value="16:00">16:00</option>
-                  <option value="17:00">17:00</option>
-                  <option value="18:00">18:00</option>
-                  <option value="19:00">19:00</option>
-                  <option value="20:00">20:00</option>
-                  <option value="21:00">21:00</option>
-                </select>
-              </div>
-            </div>
-
+          <form id="booking-form" class="space-y-5">
+            <!-- Date Picker -->
             <div>
-              <label class="block text-sm font-medium text-space-text-muted mb-2">Длительность (часы)</label>
-              <select id="booking-duration" class="input-field" required>
-                <option value="1">1 час</option>
-                <option value="2">2 часа</option>
-                <option value="3" selected>3 часа</option>
-                <option value="4">4 часа</option>
-                <option value="5">5 часов</option>
-                <option value="8">8 часов (целый день)</option>
-              </select>
+              <label class="block text-sm font-medium text-space-text-muted mb-2">Дата</label>
+              <div class="date-picker-wrapper" id="date-picker">
+                <div class="date-picker-trigger" tabindex="0" role="button" aria-haspopup="true">
+                  <span class="date-picker-value">Выберите дату</span>
+                  <svg class="w-5 h-5 text-space-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div class="date-picker-calendar"></div>
+              </div>
+              <input type="hidden" id="booking-date">
             </div>
 
+            <!-- Time Select -->
+            <div>
+              <label class="block text-sm font-medium text-space-text-muted mb-2">Время</label>
+              <div class="custom-select-wrapper" id="time-select">
+                <div class="custom-select-trigger" tabindex="0" role="button" aria-haspopup="listbox">
+                  <span class="custom-select-placeholder">Выберите время</span>
+                  <svg class="custom-select-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+                <div class="custom-select-dropdown" role="listbox"></div>
+              </div>
+              <input type="hidden" id="booking-time">
+            </div>
+
+            <!-- Duration Select -->
+            <div>
+              <label class="block text-sm font-medium text-space-text-muted mb-2">Длительность</label>
+              <div class="custom-select-wrapper" id="duration-select">
+                <div class="custom-select-trigger" tabindex="0" role="button" aria-haspopup="listbox">
+                  <span class="custom-select-value">3 часа</span>
+                  <svg class="custom-select-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+                <div class="custom-select-dropdown" role="listbox"></div>
+              </div>
+              <input type="hidden" id="booking-duration" value="3">
+            </div>
+
+            <!-- Comment -->
             <div>
               <label class="block text-sm font-medium text-space-text-muted mb-2">Комментарий</label>
-              <textarea id="booking-comment" class="input-field" rows="2" placeholder="Дополнительная информация..."></textarea>
+              <div class="custom-input-wrapper">
+                <textarea id="booking-comment" class="custom-input resize-none" rows="2" placeholder="Дополнительная информация..."></textarea>
+              </div>
             </div>
 
             <!-- Price Summary -->
@@ -918,7 +1178,10 @@
       user: null,
       currentSpace: null,
       bookings: [],
-      filter: 'all'
+      filter: 'all',
+      selectedDate: null,
+      selectedTime: null,
+      selectedDuration: 3
     };
 
     // ==========================================
@@ -991,7 +1254,9 @@
         container.appendChild(toast);
         
         setTimeout(() => {
-          toast.classList.add('removing');
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          toast.style.transition = 'all 0.3s ease';
           setTimeout(() => toast.remove(), 300);
         }, 3000);
       },
@@ -1008,6 +1273,282 @@
         this.show(message, 'info');
       }
     };
+
+    // ==========================================
+    // CUSTOM UI COMPONENTS
+    // ==========================================
+    
+    // Custom Select Component
+    class CustomSelect {
+      constructor(wrapper, options, onSelect, defaultValue = null) {
+        this.wrapper = wrapper;
+        this.options = options;
+        this.onSelect = onSelect;
+        this.selectedValue = defaultValue;
+        this.isOpen = false;
+        
+        this.trigger = wrapper.querySelector('.custom-select-trigger');
+        this.dropdown = wrapper.querySelector('.custom-select-dropdown');
+        this.hiddenInput = wrapper.nextElementSibling;
+        
+        this.init();
+      }
+      
+      init() {
+        this.renderOptions();
+        this.bindEvents();
+        
+        if (this.selectedValue) {
+          this.selectValue(this.selectedValue, false);
+        }
+      }
+      
+      renderOptions() {
+        this.dropdown.innerHTML = this.options.map(opt => `
+          <div class="custom-select-option ${opt.value === this.selectedValue ? 'selected' : ''}" 
+               data-value="${opt.value}" 
+               role="option">
+            ${opt.label}
+          </div>
+        `).join('');
+      }
+      
+      bindEvents() {
+        this.trigger.addEventListener('click', () => this.toggle());
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.toggle();
+          }
+        });
+        
+        this.dropdown.querySelectorAll('.custom-select-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            this.selectValue(opt.dataset.value);
+          });
+        });
+        
+        document.addEventListener('click', (e) => {
+          if (!this.wrapper.contains(e.target) && this.isOpen) {
+            this.close();
+          }
+        });
+      }
+      
+      toggle() {
+        this.isOpen ? this.close() : this.open();
+      }
+      
+      open() {
+        this.isOpen = true;
+        this.wrapper.classList.add('open');
+      }
+      
+      close() {
+        this.isOpen = false;
+        this.wrapper.classList.remove('open');
+      }
+      
+      selectValue(value, notify = true) {
+        this.selectedValue = value;
+        const option = this.options.find(o => o.value === value);
+        
+        if (option) {
+          const valueSpan = this.trigger.querySelector('.custom-select-placeholder, .custom-select-value');
+          if (valueSpan) {
+            valueSpan.textContent = option.label;
+            valueSpan.classList.remove('custom-select-placeholder');
+            valueSpan.classList.add('custom-select-value');
+          }
+          
+          if (this.hiddenInput) {
+            this.hiddenInput.value = value;
+          }
+          
+          this.dropdown.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.value === value);
+          });
+          
+          if (notify && this.onSelect) {
+            this.onSelect(value);
+          }
+        }
+        
+        this.close();
+      }
+    }
+    
+    // Custom Date Picker Component
+    class CustomDatePicker {
+      constructor(wrapper, onSelect) {
+        this.wrapper = wrapper;
+        this.onSelect = onSelect;
+        this.isOpen = false;
+        this.currentDate = new Date();
+        this.selectedDate = null;
+        
+        this.trigger = wrapper.querySelector('.date-picker-trigger');
+        this.calendar = wrapper.querySelector('.date-picker-calendar');
+        this.hiddenInput = wrapper.nextElementSibling;
+        
+        this.weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        this.months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        
+        this.init();
+      }
+      
+      init() {
+        this.render();
+        this.bindEvents();
+      }
+      
+      render() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        let startDay = firstDay.getDay() - 1;
+        if (startDay < 0) startDay = 6;
+        
+        const prevMonth = new Date(year, month, 0);
+        const daysInPrevMonth = prevMonth.getDate();
+        
+        let html = `
+          <div class="calendar-header">
+            <button type="button" class="calendar-nav-btn" data-action="prev" aria-label="Предыдущий месяц">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <span class="calendar-month-year">${this.months[month]} ${year}</span>
+            <button type="button" class="calendar-nav-btn" data-action="next" aria-label="Следующий месяц">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+          <div class="calendar-weekdays">
+            ${this.weekdays.map(d => `<div class="calendar-weekday">${d}</div>`).join('')}
+          </div>
+          <div class="calendar-days">
+        `;
+        
+        // Previous month days
+        for (let i = startDay - 1; i >= 0; i--) {
+          const day = daysInPrevMonth - i;
+          html += `<div class="calendar-day other-month disabled">${day}</div>`;
+        }
+        
+        // Current month days
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, month, day);
+          date.setHours(0, 0, 0, 0);
+          
+          const isPast = date < today;
+          const isToday = date.getTime() === today.getTime();
+          const isSelected = this.selectedDate && 
+            this.selectedDate.getTime() === date.getTime();
+          
+          let classes = 'calendar-day';
+          if (isPast) classes += ' disabled';
+          if (isToday) classes += ' today';
+          if (isSelected) classes += ' selected';
+          
+          html += `<div class="${classes}" data-date="${date.toISOString()}" ${isPast ? '' : 'tabindex="0"'}>${day}</div>`;
+        }
+        
+        // Next month days
+        const totalCells = startDay + daysInMonth;
+        const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+        for (let i = 1; i <= remainingCells; i++) {
+          html += `<div class="calendar-day other-month disabled">${i}</div>`;
+        }
+        
+        html += '</div>';
+        this.calendar.innerHTML = html;
+      }
+      
+      bindEvents() {
+        this.trigger.addEventListener('click', () => this.toggle());
+        this.trigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.toggle();
+          }
+        });
+        
+        this.calendar.addEventListener('click', (e) => {
+          const navBtn = e.target.closest('.calendar-nav-btn');
+          if (navBtn) {
+            const action = navBtn.dataset.action;
+            if (action === 'prev') {
+              this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            } else {
+              this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            }
+            this.render();
+            return;
+          }
+          
+          const dayEl = e.target.closest('.calendar-day:not(.disabled):not(.other-month)');
+          if (dayEl) {
+            this.selectDate(new Date(dayEl.dataset.date));
+          }
+        });
+        
+        document.addEventListener('click', (e) => {
+          if (!this.wrapper.contains(e.target) && this.isOpen) {
+            this.close();
+          }
+        });
+      }
+      
+      toggle() {
+        this.isOpen ? this.close() : this.open();
+      }
+      
+      open() {
+        this.isOpen = true;
+        this.wrapper.classList.add('open');
+      }
+      
+      close() {
+        this.isOpen = false;
+        this.wrapper.classList.remove('open');
+      }
+      
+      selectDate(date) {
+        this.selectedDate = date;
+        const valueSpan = this.trigger.querySelector('.date-picker-value');
+        if (valueSpan) {
+          valueSpan.textContent = this.formatDate(date);
+        }
+        
+        if (this.hiddenInput) {
+          this.hiddenInput.value = date.toISOString().split('T')[0];
+        }
+        
+        this.render();
+        this.close();
+        
+        if (this.onSelect) {
+          this.onSelect(date);
+        }
+      }
+      
+      formatDate(date) {
+        const day = date.getDate();
+        const month = this.months[date.getMonth()].toLowerCase();
+        const year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+      }
+    }
 
     // ==========================================
     // ROUTER
@@ -1029,33 +1570,27 @@
         const hash = window.location.hash.slice(1) || '/';
         const route = this.routes[hash] || 'catalog';
         
-        // Check auth for protected routes
-        if ((route === 'profile') && !state.user) {
+        if (route === 'profile' && !state.user) {
           window.location.hash = '/login';
           return;
         }
         
-        // Redirect logged-in users away from login
         if (route === 'login' && state.user) {
           window.location.hash = '/';
           return;
         }
         
-        // Hide all pages
         document.querySelectorAll('.page').forEach(page => {
           page.classList.remove('active');
         });
         
-        // Show current page
         const page = document.getElementById(`page-${route}`);
         if (page) {
           page.classList.add('active');
         }
         
-        // Update UI
         this.updateUI();
         
-        // Render content
         if (route === 'catalog') {
           renderSpaces();
         } else if (route === 'profile') {
@@ -1222,7 +1757,6 @@
       
       emptyState.classList.add('hidden');
       
-      // Sort by date descending
       bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
       container.innerHTML = bookings.map((booking, index) => `
@@ -1295,6 +1829,10 @@
     // ==========================================
     // MODAL FUNCTIONS
     // ==========================================
+    let datePickerInstance = null;
+    let timeSelectInstance = null;
+    let durationSelectInstance = null;
+
     function openBookingModal(spaceId) {
       if (!state.user) {
         Toast.info('Войдите для бронирования');
@@ -1309,12 +1847,6 @@
       
       const modal = document.getElementById('booking-modal');
       const spaceInfo = document.getElementById('modal-space-info');
-      const dateInput = document.getElementById('booking-date');
-      
-      // Set min date to today
-      const today = new Date().toISOString().split('T')[0];
-      dateInput.min = today;
-      dateInput.value = today;
       
       spaceInfo.innerHTML = `
         <div class="flex gap-4">
@@ -1329,9 +1861,56 @@
         </div>
       `;
       
-      updateTotalPrice();
+      // Initialize custom components
+      initCustomComponents();
+      
+      // Reset state
+      state.selectedDate = null;
+      state.selectedTime = null;
+      state.selectedDuration = 3;
+      
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      
+      updateTotalPrice();
+    }
+
+    function initCustomComponents() {
+      // Date Picker
+      const datePickerWrapper = document.getElementById('date-picker');
+      datePickerWrapper.classList.remove('open');
+      datePickerInstance = new CustomDatePicker(datePickerWrapper, (date) => {
+        state.selectedDate = date;
+        updateTotalPrice();
+      });
+      
+      // Time Select
+      const timeSelectWrapper = document.getElementById('time-select');
+      timeSelectWrapper.classList.remove('open');
+      const timeOptions = [];
+      for (let h = 9; h <= 21; h++) {
+        timeOptions.push({ value: `${h.toString().padStart(2, '0')}:00`, label: `${h.toString().padStart(2, '0')}:00` });
+      }
+      timeSelectInstance = new CustomSelect(timeSelectWrapper, timeOptions, (value) => {
+        state.selectedTime = value;
+        updateTotalPrice();
+      });
+      
+      // Duration Select
+      const durationSelectWrapper = document.getElementById('duration-select');
+      durationSelectWrapper.classList.remove('open');
+      const durationOptions = [
+        { value: '1', label: '1 час' },
+        { value: '2', label: '2 часа' },
+        { value: '3', label: '3 часа' },
+        { value: '4', label: '4 часа' },
+        { value: '5', label: '5 часов' },
+        { value: '8', label: '8 часов (целый день)' }
+      ];
+      durationSelectInstance = new CustomSelect(durationSelectWrapper, durationOptions, (value) => {
+        state.selectedDuration = parseInt(value);
+        updateTotalPrice();
+      }, '3');
     }
 
     function closeBookingModal() {
@@ -1340,12 +1919,23 @@
       document.body.style.overflow = '';
       state.currentSpace = null;
       document.getElementById('booking-form').reset();
+      
+      // Reset custom components display
+      const datePickerValue = document.querySelector('.date-picker-value');
+      if (datePickerValue) datePickerValue.textContent = 'Выберите дату';
+      
+      const timePlaceholder = document.querySelector('#time-select .custom-select-placeholder, #time-select .custom-select-value');
+      if (timePlaceholder) {
+        timePlaceholder.textContent = 'Выберите время';
+        timePlaceholder.classList.remove('custom-select-value');
+        timePlaceholder.classList.add('custom-select-placeholder');
+      }
     }
 
     function updateTotalPrice() {
       if (!state.currentSpace) return;
       
-      const duration = parseInt(document.getElementById('booking-duration').value) || 1;
+      const duration = state.selectedDuration || 3;
       const total = state.currentSpace.price * duration;
       
       document.getElementById('total-price').textContent = total.toLocaleString() + ' руб';
@@ -1405,7 +1995,6 @@
           const filter = btn.dataset.filter;
           state.filter = filter;
           
-          // Update button styles
           document.querySelectorAll('.filter-btn').forEach(b => {
             b.classList.remove('btn-primary');
             b.classList.add('btn-secondary');
@@ -1440,10 +2029,14 @@
         
         if (!state.currentSpace || !state.user) return;
         
-        const date = document.getElementById('booking-date').value;
-        const time = document.getElementById('booking-time').value;
-        const duration = document.getElementById('booking-duration').value;
+        const dateInput = document.getElementById('booking-date');
+        const timeInput = document.getElementById('booking-time');
+        const durationInput = document.getElementById('booking-duration');
         const comment = document.getElementById('booking-comment').value;
+        
+        const date = dateInput ? dateInput.value : null;
+        const time = timeInput ? timeInput.value : null;
+        const duration = durationInput ? durationInput.value : '3';
         
         if (!date || !time) {
           Toast.error('Выберите дату и время');
@@ -1463,9 +2056,6 @@
           Toast.success('Бронирование создано!');
         }
       });
-      
-      // Update price on duration change
-      document.getElementById('booking-duration').addEventListener('change', updateTotalPrice);
     });
   </script>
 </body>
